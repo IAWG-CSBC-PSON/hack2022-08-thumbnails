@@ -17,4 +17,4 @@ https://www.synapse.org/#!Synapse:syn26858164
 
 ## Other resources
 
-You will want a viewer capable of loading and displaying the example images. We recommend either [Napari](https://napari.org/) or [ImageJ/Fiji](https://fiji.sc/).
+You will want a viewer capable of loading and displaying the example images. We recommend either [Napari](https://napari.org/) or [ImageJ / Fiji](https://fiji.sc/).
