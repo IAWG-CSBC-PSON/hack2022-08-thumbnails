@@ -13,4 +13,4 @@ https://www.synapse.org/#!Synapse:syn26858164
 
 ## Reference material
 
-* **Miniature**: https://github.com/adamjtaylor/miniature/ -- Recolors high-dimensional images using UMAP to embed each pixel into CIELAB color space: . The repository is set up as a standard R project and the `docker/` subdirectory contains a Python port. You may wish to modify this code directly or simply use it as a reference.
+* **Miniature**: https://github.com/adamjtaylor/miniature/ -- Recolors high-dimensional images using UMAP to embed each pixel into CIELAB color space: . The repository is set up as a standard R project and the `docker/` subdirectory contains a Python port. You may wish to modify this code directly or simply use it as a reference. ![image](https://user-images.githubusercontent.com/14945787/127400268-b6345cf4-a90c-4d77-9f83-6889de6763a5.png)
