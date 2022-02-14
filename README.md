@@ -11,18 +11,18 @@ Participants will develop an approach to transform microscopy images in OME-TIFF
 We have provided several example [OME-TIFF](https://docs.openmicroscopy.org/ome-model/6.2.0/ome-tiff/index.html) image files. The dimensions and file sizes vary greatly, but your solution should work for all of them. The image files are [tiled pyramids](https://docs.openmicroscopy.org/ome-model/6.2.2/ome-tiff/specification.html#sub-resolutions) to enable efficient data access -- the largest files are larger than available RAM on most personal computers.
 https://www.synapse.org/#!Synapse:syn26858164
 
-|Link|Name|
-|----|----|
-|syn26947045|cycif_colorectal_carcinoma.ome.tif|
-|syn26947033|cycif_tma.ome.tif|
-|syn26946496|cycif_tonsil.ome.tif|
-|syn26858183|mibi_liver.ome.tiff|
-|syn26858168|mibi_placenta.ome.tiff|
-|syn26858167|mibi_thymus.ome.tiff|
-|syn26858166|mibi_tonsil.ome.tiff|
-|syn26858194|mibi_tumor_FOV1.ome.tiff|
-|syn26858193|mibi_tumor_FOV3.ome.tiff|
-|syn26858192|mibi_tumor_FOV5.ome.tiff|
+|Link|Name|X Size|Y Size|Channel Count|Pixel Data Type|Pixel Size (microns)|Channel Names|
+|----|----|-|-|-|-|-|-|
+|[syn26947045](https://www.synapse.org/#!Synapse:syn26947045)|cycif_colorectal_carcinoma.ome.tif|
+|[syn26947033](https://www.synapse.org/#!Synapse:syn26947033)|cycif_tma.ome.tif|
+|[syn26946496](https://www.synapse.org/#!Synapse:syn26946496)|cycif_tonsil.ome.tif|3500|2500|9|uint16|0.325|DNA,Ki-67,Keratin,CD3D,CD4,CD45,CD8A,α-SMA,CD20|
+|[syn26858183](https://www.synapse.org/#!Synapse:syn26858183)|mibi_liver.ome.tiff|
+|[syn26858168](https://www.synapse.org/#!Synapse:syn26858168)|mibi_placenta.ome.tiff|
+|[syn26858167](https://www.synapse.org/#!Synapse:syn26858167)|mibi_thymus.ome.tiff|
+|[syn26858166](https://www.synapse.org/#!Synapse:syn26858166)|mibi_tonsil.ome.tiff|
+|[syn26858194](https://www.synapse.org/#!Synapse:syn26858194)|mibi_tumor_FOV1.ome.tiff|
+|[syn26858193](https://www.synapse.org/#!Synapse:syn26858193)|mibi_tumor_FOV3.ome.tiff|
+|[syn26858192](https://www.synapse.org/#!Synapse:syn26858192)|mibi_tumor_FOV5.ome.tiff|
 
 
 ## Reference material
