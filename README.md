@@ -24,6 +24,13 @@ https://www.synapse.org/#!Synapse:syn26858164
 |[syn26858193](https://www.synapse.org/#!Synapse:syn26858193)|mibi_tumor_FOV3.ome.tiff|1024|1024|24|float32||beta-tubulin, CD11b, CD11c, CD163, CD20, CD3, CD31, CD4, CD45, CD56, CD68, CD8, dsDNA, FOXP3, HLA_class_1_A_B_and_C_Na-K-ATPase_alpha1, HLA_DR, IDO-1, Keratin, Ki-67, LAG3, PD-1, PD-L1, Podoplanin, Vimentin|
 |[syn26858192](https://www.synapse.org/#!Synapse:syn26858192)|mibi_tumor_FOV5.ome.tiff|1024|1024|24|float32||beta-tubulin, CD11b, CD11c, CD163, CD20, CD3, CD31, CD4, CD45, CD56, CD68, CD8, dsDNA, FOXP3, HLA_class_1_A_B_and_C_Na-K-ATPase_alpha1, HLA_DR, IDO-1, Keratin, Ki-67, LAG3, PD-1, PD-L1, Podoplanin, Vimentin|
 
+|Image|Channel Montage|Miniature|
+|---|---|---|
+|CyCIF Tonsil| ![tonsil](https://user-images.githubusercontent.com/14945787/153916476-eba282b3-3f34-4277-8467-50349c764840.png) |![thumbnail](https://user-images.githubusercontent.com/14945787/153916549-f910ffe5-9ef4-464d-8106-e7713286cfca.png)|
+|MIBI Tumor FOV1|![mibi_tumor1_montage](https://user-images.githubusercontent.com/14945787/153917922-80f07ca2-390e-4919-b762-3d47a86f4392.png)|![thumbnail](https://user-images.githubusercontent.com/14945787/153918240-296918b3-371f-4b9a-97cf-719c36196329.png)|
+
+
+
 
 ## Reference material
 
