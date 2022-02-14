@@ -19,7 +19,7 @@ https://www.synapse.org/#!Synapse:syn26858164
 |[syn26858183](https://www.synapse.org/#!Synapse:syn26858183)|mibi_liver.ome.tiff|
 |[syn26858168](https://www.synapse.org/#!Synapse:syn26858168)|mibi_placenta.ome.tiff|
 |[syn26858167](https://www.synapse.org/#!Synapse:syn26858167)|mibi_thymus.ome.tiff|
-|[syn26858166](https://www.synapse.org/#!Synapse:syn26858166)|mibi_tonsil.ome.tiff|
+|[syn26858166](https://www.synapse.org/#!Synapse:syn26858166)|mibi_tonsil.ome.tiff|2048|2048|27|float|1.25|beta-tubulin, CD11b,CD11c,CD163,CD20,CD3,CD31,CD4,CD45,CD45RO,CD56,CD68,CD8,DC-SIGN,dsDNA,FOXP3,Granzyme B,HLA class 1 A B and C and Na-K-ATPase alpha1, HLA DR,IDO-1,Keratin,Ki-67,LAG3,PD-1,PD-L1,Podoplanin,Vimentin,
 |[syn26858194](https://www.synapse.org/#!Synapse:syn26858194)|mibi_tumor_FOV1.ome.tiff|
 |[syn26858193](https://www.synapse.org/#!Synapse:syn26858193)|mibi_tumor_FOV3.ome.tiff|
 |[syn26858192](https://www.synapse.org/#!Synapse:syn26858192)|mibi_tumor_FOV5.ome.tiff|
