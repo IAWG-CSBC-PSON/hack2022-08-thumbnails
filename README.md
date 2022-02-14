@@ -11,6 +11,20 @@ Participants will develop an approach to transform microscopy images in OME-TIFF
 We have provided several example [OME-TIFF](https://docs.openmicroscopy.org/ome-model/6.2.0/ome-tiff/index.html) image files. The dimensions and file sizes vary greatly, but your solution should work for all of them. The image files are [tiled pyramids](https://docs.openmicroscopy.org/ome-model/6.2.2/ome-tiff/specification.html#sub-resolutions) to enable efficient data access -- the largest files are larger than available RAM on most personal computers.
 https://www.synapse.org/#!Synapse:syn26858164
 
+|Link|Name|
+|----|----|
+|syn26947045|cycif_colorectal_carcinoma.ome.tif|
+|syn26947033|cycif_tma.ome.tif|
+|syn26946496|cycif_tonsil.ome.tif|
+|syn26858183|mibi_liver.ome.tiff|
+|syn26858168|mibi_placenta.ome.tiff|
+|syn26858167|mibi_thymus.ome.tiff|
+|syn26858166|mibi_tonsil.ome.tiff|
+|syn26858194|mibi_tumor_FOV1.ome.tiff|
+|syn26858193|mibi_tumor_FOV3.ome.tiff|
+|syn26858192|mibi_tumor_FOV5.ome.tiff|
+
+
 ## Reference material
 
 * **Miniature** (https://github.com/adamjtaylor/miniature/): Recolors high-dimensional images using UMAP to embed each pixel into CIELAB color space: . The repository is set up as a standard R project and the `docker/` subdirectory contains a Python port. You may wish to modify this code directly or simply use it as a reference. ![image](https://user-images.githubusercontent.com/14945787/127400268-b6345cf4-a90c-4d77-9f83-6889de6763a5.png)
