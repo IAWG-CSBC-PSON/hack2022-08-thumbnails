@@ -19,7 +19,10 @@ https://www.synapse.org/#!Synapse:syn26858164
 
 Useful python packages include `tifffile`, `imagecodecs`, `scikit-image`, `umap-learn`, `zarr` and `colormath`. You may wish to setup a Conda environemt with recomended modules,
 
-https://github.com/adamjtaylor/htan-artist/blob/main/docker/environment.yml
+```
+wget https://raw.githubusercontent.com/adamjtaylor/htan-artist/main/docker/environment.yml
+conda env create -n artist --file=environment.yaml
+```
 
 or use the `adamjtaylor/htan-artist` docker container with these installed. Eg:
 ```
