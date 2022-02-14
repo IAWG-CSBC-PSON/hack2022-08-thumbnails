@@ -13,7 +13,7 @@ https://www.synapse.org/#!Synapse:syn26858164
 
 |Link|Name|X Size|Y Size|Channel Count|Pixel Data Type|Pixel Size (microns)|Channel Names|
 |----|----|-|-|-|-|-|-|
-|[syn26947045](https://www.synapse.org/#!Synapse:syn26947045)|cycif_colorectal_carcinoma.ome.tif|
+|[syn26947045](https://www.synapse.org/#!Synapse:syn26947045)|cycif_colorectal_carcinoma.ome.tif|26139|27120|40|uint16|0.65|DNA,Autofluorescence-488nm,Autofluorescence-555nm,Autofluorescence-647nm,DNA (2),Control-488nm,Control-555nm,Control-647nm,DNA (3),CD3,Na/K ATPase,CD45RO,DNA (4),Antigen Ki67,Pan-cytokeratin,Aortic smooth muscle actin,DNA (5),CD4,CD45,PD-1,DNA (6),CD20,CD68,CD8a,DNA (7),CD163,FOXP3,PD-L1,DNA (8),E-cadherin,Vimentin,CDX-2,DNA (9),Lamin-A/B/C,Desmin,CD31,DNA (10),PCNA,Antigen Ki67 (2),Collagen|
 |[syn26947033](https://www.synapse.org/#!Synapse:syn26947033)|cycif_tma.ome.tif|6197|6231|40|uint16|0.65|DNA_1,AF488,AF555,AF647,DNA_2,A488_background,A555_background,A647_background,DNA_3,FDX1,CD357,CD1D,DNA_4,CD163,CD3D,CD31,DNA_5,LDH,CD66B,VDAC1,DNA_6,ELANE,CD57,CD45,DNA_7,CD11B,SMA,CD16,DNA_8,ECAD,FOXP3,NCAM,DNA_9,CD4,KERATIN,CD14,DNA_10,IBA1,CD1B,CD8A|
 |[syn26946496](https://www.synapse.org/#!Synapse:syn26946496)|cycif_tonsil.ome.tif|3500|2500|9|uint16|0.325|DNA,Ki-67,Keratin,CD3D,CD4,CD45,CD8A,α-SMA,CD20|
 |[syn26858183](https://www.synapse.org/#!Synapse:syn26858183)|mibi_liver.ome.tiff|
