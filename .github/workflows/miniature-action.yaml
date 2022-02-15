@@ -13,4 +13,4 @@ jobs:
           architecture: 'x64' # optional x64 or x86. Defaults to x64 if not specified
       - run: |
           pip install -r miniature/requirements.txt
-          python miniature/paint/miniature.py test-data/cycif_tonsil_small.ome.tif miniature.png
+          python miniature/paint_miniature.py test-data/cycif_tonsil_small.ome.tif miniature.png
