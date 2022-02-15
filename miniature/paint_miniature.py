@@ -226,7 +226,7 @@ def main():
      
     
     print("Saving image as " + args.output)
-    output_path = "data/" + args.output
+    output_path = args.output
     imsave(output_path, rgb_image)
     
     if args.save_data == True:
