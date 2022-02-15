@@ -1,0 +1,37 @@
+name: thumbnails-env
+channels:
+  - defaults
+  - conda-forge
+  - ome
+  - fastai
+  - bioconda
+dependencies:
+  - python==3.8
+  - snakemake
+  - napari
+  - numpy
+  - pandas
+  - scipy
+  - tqdm
+  - matplotlib
+  - seaborn
+  - altair
+  - scikit-learn
+  - scikit-image
+  - statsmodels
+  - zarr
+  - numcodecs
+  - colormath
+  - umap-learn
+  - imagecodecs
+  - tifffile
+  - h5py
+  - bioformats2raw
+  - raw2ometiff
+  - jupyter
+  - jupyterlab
+  - pip
+  - pip:
+    - synapseclient
+    - ome-zarr
+    - napari-ome-zarr

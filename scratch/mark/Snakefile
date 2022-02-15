@@ -1,0 +1,25 @@
+from os.path import join
+
+SRC_DIR = "src"
+DATA_DIR = "data"
+RAW_DIR = join(DATA_DIR, "raw")
+PROCESSED_DIR = join(DATA_DIR, "processed")
+
+DOWNLOAD_DIR = join(RAW_DIR, "download")
+
+rule all:
+    input:
+        join(DOWNLOAD_DIR, "cycif_tonsil.ome.tif")
+
+rule download_data:
+    output:
+        join(DOWNLOAD_DIR, "cycif_tonsil.ome.tif")
+    params:
+        script=join(SRC_DIR, "download_file_from_synapse.py"),
+        synapse_id="syn26946496"
+    shell:
+        """
+        python {params.script} \
+            --synapse_id {params.synapse_id} \
+            --output_dir {DOWNLOAD_DIR}
+        """
