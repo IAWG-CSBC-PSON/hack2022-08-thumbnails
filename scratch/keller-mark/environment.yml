@@ -21,7 +21,7 @@ dependencies:
   - statsmodels
   - zarr
   - numcodecs
-  - colormath
+  - colormath==3.0.0
   - umap-learn
   - imagecodecs
   - tifffile

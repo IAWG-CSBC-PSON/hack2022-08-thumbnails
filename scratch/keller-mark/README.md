@@ -21,3 +21,19 @@ export SYNAPSE_PASSWORD="mY-sUpEr-SeCrEt-pAsSwOrD-HeRe"
 ```sh
 snakemake --cores 1
 ```
+
+## Testing miniature
+
+```sh
+python ../../miniature/paint_miniature.py \
+    'data/raw/download/cycif_tonsil.ome.tif' \
+    'data/processed/miniature.jpg'
+```
+
+
+```sh
+python ../../miniature/paint_miniature.py \
+    'data/raw/download/cycif_tonsil.ome.tif' \
+    'data/processed/miniature.jpg' \
+    --remove_bg False --dimred hclust
+```

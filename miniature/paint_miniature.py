@@ -18,7 +18,10 @@ from sklearn.manifold import TSNE
 import h5py
 from pathlib import Path
 
-
+import json
+from scipy.cluster import hierarchy
+from functools import reduce
+from uuid import uuid4
 
 def str2bool(v):
     if isinstance(v, bool):
@@ -93,6 +96,37 @@ def run_tsne(tissue_array):
     print("Running t-SNE")
     embedding = reducer.fit_transform(tissue_array)
     return(embedding)
+
+def run_hclust(tissue_array, num_colors=3):
+
+    # TODO:remove
+    # make array smaller
+    tissue_array = tissue_array[0:100, 0:tissue_array.shape[1]]
+    # TODO: end remove
+
+    [num_xy, num_channels] = tissue_array.shape
+
+    # TODO: look into 2d convolution before clustering channels
+
+    # Perform hierarchical clustering along the channels axis.
+    Z = hierarchy.linkage(tissue_array.T, method="ward")
+    T = hierarchy.to_tree(Z)
+
+    cutree = hierarchy.cut_tree(Z, n_clusters=num_colors).flatten()
+    channel_mapping = zip(cutree, range(num_channels))
+    channel_groups = dict()
+    for k, v in channel_mapping:
+        if k in channel_groups:
+            channel_groups[k].append(v)
+        else:
+            channel_groups[k] = [v]
+
+    print(channel_groups)
+
+    # TODO: aggregate pixels for each channel group
+    # TODO: map values to to unique color per group
+
+    return
     
 def embedding_to_lab_to_rgb(x):
         #print("Converting embedding to LAB colour")
@@ -220,6 +254,8 @@ def main():
             embedding = run_tsne(tissue_array)
         if args.dimred == 'umap':
             embedding = run_umap(tissue_array)
+        if args.dimred == 'hclust':
+            embedding = run_hclust(tissue_array)
             
         rgb = assign_colours(embedding)
         rgb_image = make_rgb_image(rgb, mask)
