@@ -1,0 +1,11 @@
+colormath==3.0.0
+matplotlib 
+numpy 
+scikit-image
+scikit-learn
+tifffile 
+umap-learn 
+zarr 
+imagecodecs
+argparse
+h5py
