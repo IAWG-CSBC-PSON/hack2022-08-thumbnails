@@ -13,5 +13,5 @@ For example, to paint a miniature on the second higest level, preserving the bac
 
 ```
 python paint_miniature.py 'data/HTA9_1_BA_L_ROI04.ome.tif' 'miniature.jpg' \
-     --level -2 --remove_bg True, --dimred tsne --save_data True --plot_embedding True
+     --level -2 --remove_bg True --dimred tsne --save_data True --plot_embedding True
 ````
