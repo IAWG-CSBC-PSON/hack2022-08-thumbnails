@@ -43,7 +43,7 @@ Useful python packages include `tifffile`, `imagecodecs`, `scikit-image`, `umap-
 
 ```
 wget https://raw.githubusercontent.com/adamjtaylor/htan-artist/main/docker/environment.yml
-conda env create -n artist --file=environment.yaml
+conda env create -n artist --file=environment.yml
 ```
 
 or use the `adamjtaylor/htan-artist` docker container with these installed. Eg:
