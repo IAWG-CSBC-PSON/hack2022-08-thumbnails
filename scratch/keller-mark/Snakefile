@@ -7,16 +7,45 @@ PROCESSED_DIR = join(DATA_DIR, "processed")
 
 DOWNLOAD_DIR = join(RAW_DIR, "download")
 
+FILENAME_TO_SYN_ID = {
+   "cycif_tonsil.ome.tif": "syn26946496",
+   "cycif_tonsil_small.tiff": "syn27108519",
+   "mibi_liver.ome.tiff": "syn26858183",
+   "mibi_placenta.ome.tiff": "syn26858168",
+   "mibi_thymus.ome.tiff": "syn26858167",
+   "mibi_tonsil.ome.tiff": "syn26858166",
+   "mibi_tumor_FOV1.ome.tiff": "syn26858194",
+   "mibi_tumor_FOV3.ome.tiff": "syn26858193",
+   "mibi_tumor_FOV5.ome.tiff": "syn26858192",
+}
+
 rule all:
     input:
-        join(DOWNLOAD_DIR, "cycif_tonsil.ome.tif")
+        expand(
+            join(PROCESSED_DIR, "{filename}.mini.jpg"),
+            filename=FILENAME_TO_SYN_ID.keys()
+        )
+
+rule run_miniature_hclust:
+    input:
+        join(DOWNLOAD_DIR, "{filename}")
+    output:
+        join(PROCESSED_DIR, "{filename}.mini.jpg")
+    shell:
+        """
+        python ../../miniature/paint_miniature.py \
+            '{input}' \
+            '{output}' \
+            --remove_bg False \
+            --dimred hclust
+        """
 
 rule download_data:
     output:
-        join(DOWNLOAD_DIR, "cycif_tonsil.ome.tif")
+        join(DOWNLOAD_DIR, "{filename}")
     params:
         script=join(SRC_DIR, "download_file_from_synapse.py"),
-        synapse_id="syn26946496"
+        synapse_id=(lambda w: FILENAME_TO_SYN_ID[w.filename])
     shell:
         """
         python {params.script} \

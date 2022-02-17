@@ -128,6 +128,8 @@ def run_hclust(tissue_array, num_colors=3, sum_intensities=True):
     print("Aggregating pixels within groups")
     agg_array = np.zeros((num_xy, num_colors))
     for i, v in channel_groups.items():
+        # TODO: explore alternative aggregation functions
+        # TODO: maybe take weighted average based on information content of the channel (potentially after convolution)
         agg_array[:, i] = np.mean(tissue_array[:, v], axis=1)
     
     print(agg_array.shape)
@@ -147,7 +149,7 @@ def run_hclust(tissue_array, num_colors=3, sum_intensities=True):
 
         for i in range(num_colors):
             lch = LCHabColor(
-                lch_l = 0.5,
+                lch_l = 1,
                 lch_c = 1,
                 lch_h = i/num_colors
             )
@@ -157,8 +159,8 @@ def run_hclust(tissue_array, num_colors=3, sum_intensities=True):
 
             rgb_array[:, i, :] = agg_array[:, i].repeat(3).reshape(-1, 3) * np.tile(clamped_rgb_arr, num_xy).reshape(-1,3)
         
-        #print(rgb_array)
-        rgb = rgb_array.sum(axis=2)
+        print(rgb_array.shape)
+        rgb = rgb_array.sum(axis=2) # TODO: fix this sum
 
         for i in range(3):
             rgb[:, i] = scaler.fit_transform(rgb[:, i].reshape(-1, 1)).flatten()
