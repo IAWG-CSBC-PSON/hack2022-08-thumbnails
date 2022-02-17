@@ -7,7 +7,7 @@ import zarr
 import sys
 import umap
 import numpy as np
-from colormath.color_objects import LabColor, sRGBColor
+from colormath.color_objects import LabColor, sRGBColor, LCHabColor
 from colormath.color_conversions import convert_color
 import matplotlib.pyplot as plt
 from matplotlib.image import imsave
@@ -97,18 +97,17 @@ def run_tsne(tissue_array):
     embedding = reducer.fit_transform(tissue_array)
     return(embedding)
 
-def run_hclust(tissue_array, num_colors=3):
+def run_hclust(tissue_array, num_colors=3, sum_intensities=True):
 
-    # TODO:remove
-    # make array smaller
-    tissue_array = tissue_array[0:100, 0:tissue_array.shape[1]]
-    # TODO: end remove
+    #tissue_array = tissue_array[:10, :]
 
     [num_xy, num_channels] = tissue_array.shape
 
     # TODO: look into 2d convolution before clustering channels
+    # Reference: https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.convolve.html
 
     # Perform hierarchical clustering along the channels axis.
+    print("Hierarchically clustering")
     Z = hierarchy.linkage(tissue_array.T, method="ward")
     T = hierarchy.to_tree(Z)
 
@@ -123,10 +122,71 @@ def run_hclust(tissue_array, num_colors=3):
 
     print(channel_groups)
 
-    # TODO: aggregate pixels for each channel group
-    # TODO: map values to to unique color per group
+    scaler = MinMaxScaler(feature_range = (0.0,1.0))
 
-    return
+    # Aggregate pixels for each channel group
+    print("Aggregating pixels within groups")
+    agg_array = np.zeros((num_xy, num_colors))
+    for i, v in channel_groups.items():
+        agg_array[:, i] = np.mean(tissue_array[:, v], axis=1)
+    
+    print(agg_array.shape)
+
+    #print(agg_array)
+    #print(agg_array[:, 0].reshape(1, -1))
+    #print(scaler.fit_transform(agg_array[:, 0].reshape(-1, 1)).flatten())
+
+    # TODO: Rescale pixel intensities?
+
+    
+    
+    # Map values to to unique color per group
+    print("Assigning colors")
+    if sum_intensities:
+        rgb_array = np.zeros((num_xy, num_colors, 3))
+
+        for i in range(num_colors):
+            lch = LCHabColor(
+                lch_l = 0.5,
+                lch_c = 1,
+                lch_h = i/num_colors
+            )
+            rgb = convert_color(lch, sRGBColor)
+            clamped_rgb = sRGBColor(rgb.clamped_rgb_r, rgb.clamped_rgb_g, rgb.clamped_rgb_b)
+            clamped_rgb_arr = np.array(clamped_rgb.get_value_tuple())
+
+            rgb_array[:, i, :] = agg_array[:, i].repeat(3).reshape(-1, 3) * np.tile(clamped_rgb_arr, num_xy).reshape(-1,3)
+        
+        #print(rgb_array)
+        rgb = rgb_array.sum(axis=2)
+
+        for i in range(3):
+            rgb[:, i] = scaler.fit_transform(rgb[:, i].reshape(-1, 1)).flatten()
+        print(rgb[:10, :])
+
+    else:
+        rgb_array = np.zeros((num_xy, num_colors, 3))
+        for i in range(num_colors):
+            def get_color(val):
+                lch = LCHabColor(
+                    lch_l = val,
+                    lch_c = 1,
+                    lch_h = i/num_colors
+                )
+                rgb = convert_color(lch, sRGBColor)
+                clamped_rgb = sRGBColor(rgb.clamped_rgb_r, rgb.clamped_rgb_g, rgb.clamped_rgb_b)
+                return clamped_rgb.get_value_tuple()
+            
+            rgb_array[:, i, :] = np.array(list(map(get_color, agg_array[:, i].tolist())))
+        
+        print(rgb_array.shape)
+        rgb = rgb_array.sum(axis=2)
+
+    print(rgb.shape)
+    
+    rgb = rgb.clip(min=0.0, max=1.0)
+
+    return rgb
     
 def embedding_to_lab_to_rgb(x):
         #print("Converting embedding to LAB colour")
@@ -252,14 +312,17 @@ def main():
         
         if args.dimred == 'tsne':
             embedding = run_tsne(tissue_array)
+            rgb = assign_colours(embedding)
         if args.dimred == 'umap':
             embedding = run_umap(tissue_array)
+            rgb = assign_colours(embedding)
+            print(rgb.shape)
         if args.dimred == 'hclust':
-            embedding = run_hclust(tissue_array)
-            
-        rgb = assign_colours(embedding)
+            rgb = run_hclust(tissue_array)
+        
         rgb_image = make_rgb_image(rgb, mask)
-     
+        
+        print(rgb_image.shape)
     
     print("Saving image as " + args.output)
     output_path = args.output
