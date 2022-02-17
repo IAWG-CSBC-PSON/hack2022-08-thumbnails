@@ -97,7 +97,7 @@ def run_tsne(tissue_array):
     embedding = reducer.fit_transform(tissue_array)
     return(embedding)
 
-def run_hclust(tissue_array, num_colors=3, sum_intensities=True):
+def run_hclust(tissue_array, num_colors=3):
 
     #tissue_array = tissue_array[:10, :]
 
@@ -130,62 +130,47 @@ def run_hclust(tissue_array, num_colors=3, sum_intensities=True):
     for i, v in channel_groups.items():
         # TODO: explore alternative aggregation functions
         # TODO: maybe take weighted average based on information content of the channel (potentially after convolution)
-        agg_array[:, i] = np.mean(tissue_array[:, v], axis=1)
+        agg_array[:, i] = np.sum(tissue_array[:, v], axis=1)
+        # normalize values for the aggregated channel
+        # TODO: determine correct normalization/rescaling approach here
+        agg_array[:, i] = (agg_array[:, i] - agg_array[:, i].min()) / agg_array[:, i].max()
     
     print(agg_array.shape)
 
-    #print(agg_array)
-    #print(agg_array[:, 0].reshape(1, -1))
-    #print(scaler.fit_transform(agg_array[:, 0].reshape(-1, 1)).flatten())
-
-    # TODO: Rescale pixel intensities?
-
-    
-    
     # Map values to to unique color per group
     print("Assigning colors")
-    if sum_intensities:
-        rgb_array = np.zeros((num_xy, num_colors, 3))
 
-        for i in range(num_colors):
-            lch = LCHabColor(
-                lch_l = 1,
-                lch_c = 1,
-                lch_h = i/num_colors
-            )
-            rgb = convert_color(lch, sRGBColor)
-            clamped_rgb = sRGBColor(rgb.clamped_rgb_r, rgb.clamped_rgb_g, rgb.clamped_rgb_b)
-            clamped_rgb_arr = np.array(clamped_rgb.get_value_tuple())
+    rgb_array = np.zeros((num_xy, 3, num_colors))
 
-            rgb_array[:, i, :] = agg_array[:, i].repeat(3).reshape(-1, 3) * np.tile(clamped_rgb_arr, num_xy).reshape(-1,3)
-        
-        print(rgb_array.shape)
-        rgb = rgb_array.sum(axis=2) # TODO: fix this sum
+    for i in range(num_colors):
+        lch = LCHabColor(
+            lch_l = 1,
+            lch_c = 1,
+            lch_h = i/num_colors
+        )
+        rgb = convert_color(lch, sRGBColor)
+        clamped_rgb = sRGBColor(rgb.clamped_rgb_r, rgb.clamped_rgb_g, rgb.clamped_rgb_b)
+        clamped_rgb_arr = np.array(clamped_rgb.get_value_tuple())
 
-        for i in range(3):
-            rgb[:, i] = scaler.fit_transform(rgb[:, i].reshape(-1, 1)).flatten()
-        print(rgb[:10, :])
-
-    else:
-        rgb_array = np.zeros((num_xy, num_colors, 3))
-        for i in range(num_colors):
-            def get_color(val):
-                lch = LCHabColor(
-                    lch_l = val,
-                    lch_c = 1,
-                    lch_h = i/num_colors
-                )
-                rgb = convert_color(lch, sRGBColor)
-                clamped_rgb = sRGBColor(rgb.clamped_rgb_r, rgb.clamped_rgb_g, rgb.clamped_rgb_b)
-                return clamped_rgb.get_value_tuple()
-            
-            rgb_array[:, i, :] = np.array(list(map(get_color, agg_array[:, i].tolist())))
-        
-        print(rgb_array.shape)
-        rgb = rgb_array.sum(axis=2)
-
-    print(rgb.shape)
+        rgb_array[:, :, i] = np.multiply(agg_array[:, i].repeat(3).reshape(-1, 3), np.tile(clamped_rgb_arr, num_xy).reshape(-1,3))
+        # TODO: determine correct normalization/rescaling approach here
+        rgb_array[:, :, i] = (rgb_array[:, :, i] - rgb_array[:, :, i].min()) / rgb_array[:, :, i].max()
     
+    # Blend colors
+    print(rgb_array.shape)
+    print(rgb_array[:10])
+    # TODO: determine best way to blend colors
+    # TODO: fix this sum. axis=1 wrong but produces nice image when num_colors = 3
+    # TODO: fix this sum. axis=2 correct but images look black and white, probably due to bad/incorrect normalization steps
+    rgb = rgb_array.sum(axis=2) # TODO: fix this sum
+    print(rgb[:10])
+
+    for i in range(3):
+        # TODO: determine correct normalization/rescaling approach here
+        # should normalization be done per-channel?
+        rgb[:, i] = (rgb[:, i] - rgb.min()) / rgb.max()
+    print(rgb[:10, :])
+
     rgb = rgb.clip(min=0.0, max=1.0)
 
     return rgb

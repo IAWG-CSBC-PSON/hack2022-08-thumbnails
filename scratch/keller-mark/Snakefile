@@ -3,7 +3,7 @@ from os.path import join
 SRC_DIR = "src"
 DATA_DIR = "data"
 RAW_DIR = join(DATA_DIR, "raw")
-PROCESSED_DIR = join(DATA_DIR, "processed")
+PROCESSED_DIR = join(DATA_DIR, "processed2")
 
 DOWNLOAD_DIR = join(RAW_DIR, "download")
 
