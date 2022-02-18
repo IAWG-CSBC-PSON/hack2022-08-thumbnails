@@ -55,7 +55,7 @@ def remove_background(zarray):
     print("Background removed")
     def get_tissue(x):
         return x[cleaned]
-    tissue_array = list(map(get_tissue, zarray))
+    tissue_array = list(map(get_tissue, zarray))    
     tissue_array = np.array(tissue_array).T
     print("Selected", tissue_array.shape[0], "of", zarray.shape[1]*zarray.shape[2], "pixels as tissue")
     print("Pixels x channels matrix prepared")
@@ -83,6 +83,52 @@ def run_umap(tissue_array):
     print("Running UMAP")
     embedding = reducer.fit_transform(tissue_array)
     return(embedding)
+
+def run_max_bad(zarray):
+    tissue_array = np.array(zarray)
+    
+    num_channels = tissue_array.shape[-1]
+    scaler = MinMaxScaler()
+
+    scaler.fit_transform(tissue_array[..., 0])
+
+    for channel in range(num_channels):
+        tissue_array[..., channel] = scaler.fit_transform(tissue_array[..., channel])
+    
+    ind = np.argpartition(a = tissue_array, kth = -3, axis = 0)[-3:, :, ...]
+
+    embedding = tissue_array[ind]
+    
+    embedding = embedding.reshape(-1, ind.shape[0])
+
+    return(embedding)
+    
+def run_max(tissue_array):
+    
+
+    # num_channels = tissue_array.shape[-1]
+    
+    scaler = MinMaxScaler()
+
+    tissue_array = scaler.fit_transform(tissue_array)
+    
+    ind = np.argpartition(a = tissue_array, kth = -3, axis = 1)[:, -3:]
+    
+    # ind[np.argsort(a[ind])]
+
+    # print(ind[np.random.randint(0, 50000)])
+
+    # print('ind', ind.shape)
+
+    # embedding = tissue_array[ind]
+
+    # print('embedding', embedding.shape)
+
+    # print(embedding)
+
+    # sys.exit()
+
+    return(ind)
     
 def run_tsne(tissue_array):
     reducer = TSNE(
@@ -220,6 +266,8 @@ def main():
             embedding = run_tsne(tissue_array)
         if args.dimred == 'umap':
             embedding = run_umap(tissue_array)
+        if args.dimred == 'max':
+            embedding = run_max(tissue_array)
             
         rgb = assign_colours(embedding)
         rgb_image = make_rgb_image(rgb, mask)
@@ -238,3 +286,7 @@ def main():
     
 if __name__ == "__main__":
     main()  
+
+
+    "python paint_miniature.py '/home/jupyter/Surya/iawg_hackathon/cycif_tonsil_small.tiff' '/home/jupyter/Surya/iawg_hackathon/cycif_tonsil_small.jpg' --level -1 --remove_bg True --dimred umap --save_data False --plot_embedding False"
+    "python paint_miniature.py '/home/jupyter/Surya/iawg_hackathon/cycif_tonsil_small.tiff' '/home/jupyter/Surya/iawg_hackathon/cycif_tonsil_small_max2.jpg' --level -1 --remove_bg True --dimred max --save_data False --plot_embedding False"
