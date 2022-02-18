@@ -3,7 +3,8 @@ from os.path import join
 SRC_DIR = "src"
 DATA_DIR = "data"
 RAW_DIR = join(DATA_DIR, "raw")
-PROCESSED_DIR = join(DATA_DIR, "processed2")
+PROCESSED_DIR = join(DATA_DIR, "processed")
+DEBUG_DIR = join(DATA_DIR, "debug")
 
 DOWNLOAD_DIR = join(RAW_DIR, "download")
 
@@ -19,25 +20,62 @@ FILENAME_TO_SYN_ID = {
    "mibi_tumor_FOV5.ome.tiff": "syn26858192",
 }
 
+COLOR_ASSIGNMENT_METHODS = [
+    "pixel_sum",
+    "pixel_max",
+    "group_hue"
+]
+
 rule all:
     input:
         expand(
-            join(PROCESSED_DIR, "{filename}.mini.jpg"),
-            filename=FILENAME_TO_SYN_ID.keys()
+            join(PROCESSED_DIR, "{filename}.{num_colors}.{color_method}.thumbnail.jpg"),
+            filename=FILENAME_TO_SYN_ID.keys(),
+            num_colors=range(3, 7),
+            color_method=COLOR_ASSIGNMENT_METHODS
+        ),
+        expand(
+            join(DEBUG_DIR, "{filename}.{num_colors}.{color_method}.{color_index}.thumbnail.jpg"),
+            filename=["cycif_tonsil.ome.tif"],
+            num_colors=[3],
+            color_method=["pixel_sum"],
+            color_index=[1, 2, 3]
         )
 
-rule run_miniature_hclust:
+# Debugging outputs
+rule run_miniature_hclust_split_channels:
     input:
         join(DOWNLOAD_DIR, "{filename}")
     output:
-        join(PROCESSED_DIR, "{filename}.mini.jpg")
+        thumbnail=join(DEBUG_DIR, "{filename}.{num_colors}.{color_method}.{color_index}.thumbnail.jpg")
     shell:
         """
         python ../../miniature/paint_miniature.py \
             '{input}' \
-            '{output}' \
+            '{output.thumbnail}' \
             --remove_bg False \
-            --dimred hclust
+            --dimred hclust \
+            --num_colors {wildcards.num_colors} \
+            --color_method {wildcards.color_method} \
+            --color_index {wildcards.color_index}
+        """
+
+# Regular outputs
+rule run_miniature_hclust:
+    input:
+        join(DOWNLOAD_DIR, "{filename}")
+    output:
+        thumbnail=join(PROCESSED_DIR, "{filename}.{num_colors}.{color_method}.thumbnail.jpg"),
+        dendrogram=join(PROCESSED_DIR, "{filename}.{num_colors}.{color_method}.dendrogram.jpg")
+    shell:
+        """
+        python ../../miniature/paint_miniature.py \
+            '{input}' \
+            '{output.thumbnail}' \
+            --remove_bg False \
+            --dimred hclust \
+            --num_colors {wildcards.num_colors} \
+            --color_method {wildcards.color_method}
         """
 
 rule download_data:

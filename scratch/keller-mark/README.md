@@ -35,5 +35,8 @@ python ../../miniature/paint_miniature.py \
 python ../../miniature/paint_miniature.py \
     'data/raw/download/cycif_tonsil.ome.tif' \
     'data/processed/miniature.jpg' \
-    --remove_bg False --dimred hclust
+    --remove_bg False \
+    --dimred hclust \
+    --num_colors 3 \
+    --color_method group_hue
 ```

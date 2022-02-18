@@ -7,7 +7,7 @@ import zarr
 import sys
 import umap
 import numpy as np
-from colormath.color_objects import LabColor, sRGBColor, LCHabColor
+from colormath.color_objects import LabColor, sRGBColor, LCHuvColor, XYZColor
 from colormath.color_conversions import convert_color
 import matplotlib.pyplot as plt
 from matplotlib.image import imsave
@@ -15,13 +15,44 @@ from sklearn.preprocessing import MinMaxScaler
 from skimage.filters import threshold_otsu
 from skimage.morphology import remove_small_objects
 from sklearn.manifold import TSNE
+from sklearn.mixture import GaussianMixture
 import h5py
 from pathlib import Path
 
 import json
 from scipy.cluster import hierarchy
+from scipy.stats import norm
 from functools import reduce
 from uuid import uuid4
+
+def auto_threshold(img):
+
+    assert img.ndim == 2
+
+    yi, xi = np.floor(np.linspace(0, img.shape, 200, endpoint=False)).astype(int).T
+    # Slice one dimension at a time. Should generally use less memory than a meshgrid.
+    img = img[yi]
+    img = img[:, xi]
+    img_log = np.log(img[img > 0])
+    gmm = GaussianMixture(3, max_iter=1000, tol=1e-6)
+    gmm.fit(img_log.reshape((-1,1)))
+    means = gmm.means_[:, 0]
+    _, i1, i2 = np.argsort(means)
+    mean1, mean2 = means[[i1, i2]]
+    std1, std2 = gmm.covariances_[[i1, i2], 0, 0] ** 0.5
+
+    x = np.linspace(mean1, mean2, 50)
+    y1 = norm(mean1, std1).pdf(x) * gmm.weights_[i1]
+    y2 = norm(mean2, std2).pdf(x) * gmm.weights_[i2]
+
+    lmax = mean2 + 2 * std2
+    lmin = x[np.argmin(np.abs(y1 - y2))]
+    if lmin >= mean2:
+        lmin = mean2 - 2 * std2
+    vmin = max(np.exp(lmin), img.min(), 0)
+    vmax = min(np.exp(lmax), img.max())
+
+    return vmin, vmax
 
 def str2bool(v):
     if isinstance(v, bool):
@@ -97,7 +128,7 @@ def run_tsne(tissue_array):
     embedding = reducer.fit_transform(tissue_array)
     return(embedding)
 
-def run_hclust(tissue_array, num_colors=3):
+def run_hclust(tissue_array, num_colors, color_method, dendrogram_file, color_index):
 
     #tissue_array = tissue_array[:10, :]
 
@@ -110,6 +141,11 @@ def run_hclust(tissue_array, num_colors=3):
     print("Hierarchically clustering")
     Z = hierarchy.linkage(tissue_array.T, method="ward")
     T = hierarchy.to_tree(Z)
+
+    if dendrogram_file is not None:
+        plt.figure()
+        hierarchy.dendrogram(Z, link_color_func=lambda k: "k")
+        plt.savefig(dendrogram_file)
 
     cutree = hierarchy.cut_tree(Z, n_clusters=num_colors).flatten()
     channel_mapping = zip(cutree, range(num_channels))
@@ -140,36 +176,71 @@ def run_hclust(tissue_array, num_colors=3):
     # Map values to to unique color per group
     print("Assigning colors")
 
-    rgb_array = np.zeros((num_xy, 3, num_colors))
+    rgb_array = np.zeros((num_xy, 3))
 
-    for i in range(num_colors):
-        lch = LCHabColor(
-            lch_l = 1,
-            lch_c = 1,
-            lch_h = i/num_colors
-        )
-        rgb = convert_color(lch, sRGBColor)
-        clamped_rgb = sRGBColor(rgb.clamped_rgb_r, rgb.clamped_rgb_g, rgb.clamped_rgb_b)
-        clamped_rgb_arr = np.array(clamped_rgb.get_value_tuple())
+    if color_method in {"pixel_sum", "pixel_max"}:
+        
+        for i in range(num_xy):
+            if color_method == "pixel_sum":
+                group_argmax = agg_array[i, :].argmax()
+                if color_index is None or group_argmax == color_index:
+                    lch = LCHuvColor(
+                        lch_l = min(100, agg_array[i, :].sum()*100),
+                        lch_c = 90,
+                        lch_h = (group_argmax/num_colors)*360
+                    )
+                else:
+                    lch = LCHuvColor(
+                        lch_l = 0,
+                        lch_c = 90,
+                        lch_h = (group_argmax/num_colors)*360
+                    )
+            elif color_method == "pixel_max":
+                lch = LCHuvColor(
+                    lch_l = min(100, agg_array[i, :].max()*100),
+                    lch_c = 90,
+                    lch_h = (agg_array[i, :].argmax()/num_colors)*360
+                )
+            rgb = convert_color(lch, sRGBColor)
+            clamped_rgb = sRGBColor(rgb.clamped_rgb_r, rgb.clamped_rgb_g, rgb.clamped_rgb_b)
+            clamped_rgb_arr = np.array(clamped_rgb.get_value_tuple())
+            rgb_array[i, :] = clamped_rgb_arr
+        
+        rgb = rgb_array
 
-        rgb_array[:, :, i] = np.multiply(agg_array[:, i].repeat(3).reshape(-1, 3), np.tile(clamped_rgb_arr, num_xy).reshape(-1,3))
-        # TODO: determine correct normalization/rescaling approach here
-        rgb_array[:, :, i] = (rgb_array[:, :, i] - rgb_array[:, :, i].min()) / rgb_array[:, :, i].max()
-    
-    # Blend colors
-    print(rgb_array.shape)
-    print(rgb_array[:10])
-    # TODO: determine best way to blend colors
-    # TODO: fix this sum. axis=1 wrong but produces nice image when num_colors = 3
-    # TODO: fix this sum. axis=2 correct but images look black and white, probably due to bad/incorrect normalization steps
-    rgb = rgb_array.sum(axis=2) # TODO: fix this sum
-    print(rgb[:10])
+    elif color_method == "group_hue":
+        # Go to xyz space
+        # Picking constant h for each cluster
+        # XYZ is the central color space, then take average there, then convert to sRGB
+        rgb_array = np.zeros((num_xy, 3))
+        xyz_array = np.zeros((num_xy, num_colors, 3))
+
+        for i in range(num_colors):
+            lch = LCHuvColor(
+                lch_l = 50,
+                lch_c = 66,
+                lch_h = (i/num_colors)*360
+            )
+            xyz = convert_color(lch, XYZColor)
+            xyz_arr = np.array(xyz.get_value_tuple())
+
+            xyz_array[:, i, :] = np.multiply(agg_array[:, i].repeat(3).reshape(-1, 3), np.tile(xyz_arr, num_xy).reshape(-1,3))
+
+        # Do sum in XYZ space
+        xyz = xyz_array.sum(axis=2)
+        # Convert to sRGB
+        for i in range(num_xy):
+            xyz_obj = XYZColor(xyz_x = xyz[i, 0], xyz_y = xyz[i, 1], xyz_z = xyz[i, 2])
+            rgb = convert_color(xyz_obj, sRGBColor)
+            clamped_rgb = sRGBColor(rgb.clamped_rgb_r, rgb.clamped_rgb_g, rgb.clamped_rgb_b)
+            rgb_array[i, :] = np.array(clamped_rgb.get_value_tuple())
+        
+        rgb = rgb_array
 
     for i in range(3):
         # TODO: determine correct normalization/rescaling approach here
         # should normalization be done per-channel?
-        rgb[:, i] = (rgb[:, i] - rgb.min()) / rgb.max()
-    print(rgb[:10, :])
+        rgb[:, i] = (rgb[:, i] - rgb[:, i].min()) / rgb[:, i].max()
 
     rgb = rgb.clip(min=0.0, max=1.0)
 
@@ -270,6 +341,30 @@ def main():
                         dest='dimred',
                         default='umap',
                         help='Dimensionality reduction method [umap, tsne]') 
+    
+    parser.add_argument('--num_colors',
+                        type=int,
+                        dest='num_colors',
+                        default=3,
+                        help='Number of colors for --dimred hclust')
+    
+    parser.add_argument('--color_method',
+                        type=str,
+                        dest='color_method',
+                        default="pixel_sum",
+                        help='Method of assigning colors to pixels for --dimred hclust')
+    
+    parser.add_argument('--color_index',
+                        type=int,
+                        dest='color_index',
+                        default=None,
+                        help='Only use one color channel for the output. This is a debugging option for --dimred hclust')
+    
+    parser.add_argument('--dendrogram_file',
+                        type=str,
+                        default=None,
+                        dest='dendrogram_file',
+                        help='File path for storing dendrogram plot for --dimred hclust')
                         
     parser.add_argument('--save_data',
                     type=str2bool,
@@ -305,7 +400,7 @@ def main():
             rgb = assign_colours(embedding)
             print(rgb.shape)
         if args.dimred == 'hclust':
-            rgb = run_hclust(tissue_array)
+            rgb = run_hclust(tissue_array, args.num_colors, args.color_method, args.dendrogram_file, args.color_index-1 if args.color_index is not None else None)
         
         rgb_image = make_rgb_image(rgb, mask)
         
