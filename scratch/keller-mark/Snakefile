@@ -75,7 +75,8 @@ rule run_miniature_hclust:
             --remove_bg False \
             --dimred hclust \
             --num_colors {wildcards.num_colors} \
-            --color_method {wildcards.color_method}
+            --color_method {wildcards.color_method} \
+            --dendrogram_file {output.dendrogram}
         """
 
 rule download_data:

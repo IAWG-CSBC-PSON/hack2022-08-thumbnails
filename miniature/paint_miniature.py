@@ -24,6 +24,7 @@ from scipy.cluster import hierarchy
 from scipy.stats import norm
 from functools import reduce
 from uuid import uuid4
+from ome_types import from_tiff
 
 def auto_threshold(img):
 
@@ -128,7 +129,7 @@ def run_tsne(tissue_array):
     embedding = reducer.fit_transform(tissue_array)
     return(embedding)
 
-def run_hclust(tissue_array, num_colors, color_method, dendrogram_file, color_index):
+def run_hclust(tissue_array, num_colors, color_method, dendrogram_file, color_index, channel_labels):
 
     #tissue_array = tissue_array[:10, :]
 
@@ -144,8 +145,8 @@ def run_hclust(tissue_array, num_colors, color_method, dendrogram_file, color_in
 
     if dendrogram_file is not None:
         plt.figure()
-        hierarchy.dendrogram(Z, link_color_func=lambda k: "k")
-        plt.savefig(dendrogram_file)
+        hierarchy.dendrogram(Z, link_color_func=lambda k: "k", labels = channel_labels, leaf_rotation=90)
+        plt.savefig(dendrogram_file, bbox_inches = "tight")
 
     cutree = hierarchy.cut_tree(Z, n_clusters=num_colors).flatten()
     channel_mapping = zip(cutree, range(num_channels))
@@ -311,6 +312,13 @@ def save_data(output, args, tissue_array, mask, embedding, rgb, rgb_image):
     h5.create_dataset('rgb_array', data = rgb)
     h5.create_dataset('rgb_image', data = rgb_image)
 
+def get_channel_labels(input):
+    try:
+        ome_file = from_tiff(input)
+        return [ c.name for c in ome_file.images[0].pixels.channels ]
+    except:
+        return None
+
 def main():
 
     parser = argparse.ArgumentParser(description = 'Paint a miniature from an OME-TIFF')
@@ -381,6 +389,8 @@ def main():
     args = parser.parse_args()
     
     zarray = pull_pyramid(args.input, args.level)
+
+    channel_labels = get_channel_labels(args.input)
     
     if zarray.shape[0] == 3:
         rgb_image = np.moveaxis(zarray, 0, -1)
@@ -400,7 +410,7 @@ def main():
             rgb = assign_colours(embedding)
             print(rgb.shape)
         if args.dimred == 'hclust':
-            rgb = run_hclust(tissue_array, args.num_colors, args.color_method, args.dendrogram_file, args.color_index-1 if args.color_index is not None else None)
+            rgb = run_hclust(tissue_array, args.num_colors, args.color_method, args.dendrogram_file, args.color_index-1 if args.color_index is not None else None, channel_labels)
         
         rgb_image = make_rgb_image(rgb, mask)
         
