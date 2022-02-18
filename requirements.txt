@@ -1,0 +1,10 @@
+tifffile
+bokeh.palettes
+zarr
+numpy
+
+os
+argparse
+
+imageio
+PIL
